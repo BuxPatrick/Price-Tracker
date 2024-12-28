@@ -36,10 +36,31 @@ def track_prices():
                 
             email_message_info.append(abs(price_difference))
             
-            email = open(r'your email').read()
-            password=open(r'your password').read()
+            email = open(r'email.txt').read()
+            password=open(r'password.txt').read()
             
-            port = 465  # For SSL
+            port = 465
             smtp_server = "smtp.gmail.com"
-            sender_email = email  # Enter your address
+            sender_email = email
             receiver_email = email
+
+            subject = "Price has {}".format(email_message_info[0])
+            
+            email_body = "The price has {} by {} The new price is {}. Go check it out here: {}""".format(email_message_info[0],
+                                                                                                         email_message_info[1],
+                                                                                                         float(price),
+                                                                                                         url)
+            
+            message = 'Subject: {}\n\n{}'.format(subject,email_body)
+
+            context = ssl.create_default_context()
+            
+            with smtplib.SMTP_SSL(smtp_server, port, context=context) as server:
+                server.login(email, password)
+                server.sendmail(sender_email, receiver_email, message)
+
+schedule.every(5).seconds.do(track_prices)
+
+while True:
+    schedule.run_pending()
+    time.sleep(1)
